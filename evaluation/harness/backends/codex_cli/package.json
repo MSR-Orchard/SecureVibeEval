@@ -1,0 +1,11 @@
+{
+  "name": "safevibe-codex-cli",
+  "private": true,
+  "version": "1.0.0",
+  "engines": {
+    "node": "22.23.2"
+  },
+  "dependencies": {
+    "@openai/codex": "0.153.4"
+  }
+}

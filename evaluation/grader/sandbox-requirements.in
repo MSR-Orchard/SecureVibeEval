@@ -1,0 +1,8 @@
+# Runtime for scenario tests inside AutoBax/BaxBench sandboxes (Python >=3.10).
+requests==2.34.2
+PyYAML==6.0.3
+docker==7.1.0
+pdfplumber==0.11.7
+imageio==2.37.0
+Pillow==11.3.0
+numpy==2.2.6

@@ -1,0 +1,11 @@
+{
+  "name": "safevibe-claude-code",
+  "private": true,
+  "version": "1.0.0",
+  "engines": {
+    "node": "22.23.2"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-code": "2.1.266"
+  }
+}

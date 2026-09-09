@@ -1,0 +1,166 @@
+# Shared securegen implementation config.
+#
+# Model-specific YAMLs should extend this file and only override the model block
+# and any backend-specific environment defaults.
+
+agent:
+  system_template: |
+    You are a helpful assistant that can interact with a computer shell to solve programming tasks.
+  instance_template: |
+    <task>
+    {{task}}
+    </task>
+
+    <instructions>
+    # Task Instructions
+
+    ## Overview
+
+    You're a software engineer working in an existing code repository, which is the
+    current working directory. Part of the implementation has been removed, and your job
+    is to (re)implement it so that the functionality described in the task works,
+    correctly and consistently with the rest of the codebase. Write production-quality
+    code as if you were landing this change for real users.
+    <IMPORTANT>This is an interactive process: think, issue AT LEAST ONE command, see the result, then think and issue your next command(s).</IMPORTANT>
+
+    For each response:
+
+    1. Include a THOUGHT section explaining your reasoning and what you're trying to accomplish.
+    2. Provide one or more bash tool calls to execute.
+
+    ## Important Boundaries
+
+    - MODIFY: regular source code files in the current working directory (the repo).
+    - DO NOT MODIFY: tests, or configuration/build/packaging files (pyproject.toml,
+      setup.cfg, go.mod, package.json, etc.) unless the task is explicitly about them.
+
+    ## Recommended Workflow
+
+    1. Explore the repository: find the file(s) and function(s) the task refers to and
+       read the surrounding code to learn the conventions, types, and helpers in use.
+    2. Implement the missing functionality in the source files.
+    3. Write a small script (or use the existing entry points) to exercise your code and
+       confirm the described behavior works; iterate.
+    4. Consider edge cases and make the implementation robust.
+
+    ## Command Execution Rules
+
+    You are operating in an environment where
+
+    1. You issue at least one command.
+    2. The system executes the command(s) in a subshell.
+    3. You see the result(s).
+    4. You write your next command(s).
+
+    **CRITICAL REQUIREMENTS:**
+
+    - Your response MUST include AT LEAST ONE bash tool call. You may make multiple tool
+      calls in one response when the commands are independent (e.g. reading several files).
+    - Directory and environment-variable changes do NOT persist between commands (each
+      runs in a fresh subshell). Chain with `cd <dir> && ...` or write state to files.
+    - Always use non-interactive flags (`-y`, `-f`); never launch vi/nano or anything
+      that waits for input. Start long-running processes in the background (append `&`).
+
+    ## Environment Details
+
+    - You have a full Linux shell. The repo's language toolchain and dependencies are
+      already installed; you should not need to install frameworks.
+
+    ## Submission
+
+    When you've completed your work, you MUST submit your changes as a git patch.
+    Follow these steps IN ORDER, with SEPARATE commands:
+
+    Step 1: Create the patch file
+    Run `git diff -- path/to/file1 path/to/file2 > patch.txt` listing only the source
+    files you modified. Do NOT commit your changes.
+
+    <IMPORTANT>
+    The patch must only contain changes to the specific source files you modified to
+    implement the functionality. Do NOT include:
+
+    - test or reproduction files
+    - helper scripts or tools that you created
+    - installation, build, packaging, or configuration files (unless the task is about them)
+    - binary or compiled files
+    </IMPORTANT>
+
+    Step 2: Verify your patch
+    Inspect patch.txt to confirm it only contains your intended changes and that the
+    headers show `--- a/` and `+++ b/` paths.
+
+    Step 3: Submit (EXACT command required)
+    You MUST use this EXACT command to submit:
+
+    ```bash
+    echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt
+    ```
+
+    If the command fails (nonzero exit status), it will not submit.
+
+    <CRITICAL>
+    - Creating/viewing the patch and submitting it MUST be separate commands (not combined with &&).
+    - If you modify patch.txt after verifying, you SHOULD verify again before submitting.
+    - You CANNOT continue working in any way on this task after submitting.
+    </CRITICAL>
+    </instructions>
+  action_observation_template: |
+    {% if output.returncode != 0 %}<returncode>{{ output.returncode }}</returncode>{% endif %}
+    {% if output.output %}<output>
+    {{ output.output }}
+    </output>{% endif %}
+  step_limit: 100
+  cost_limit: 0.0
+  wall_time_limit_seconds: 2400
+
+environment:
+  environment_class: sandbox
+  cwd: "/workspace"           # overridden PER INSTANCE by batch_run.py to the repo dir
+  timeout: 120
+  startup_timeout: 600
+  cpu: "2"
+  memory: "8Gi"
+  env:
+    PAGER: cat
+    MANPAGER: cat
+    LESS: -R
+    PIP_PROGRESS_BAR: "off"
+    TQDM_DISABLE: "1"
+
+model:
+  observation_template: |
+    {% if output.exception_info -%}
+    <exception>{{output.exception_info}}</exception>
+    {% endif -%}
+    <returncode>{{output.returncode}}</returncode>
+    {% if output.output | length < 10000 -%}
+    <output>
+    {{ output.output -}}
+    </output>
+    {%- else -%}
+    <warning>
+    The output of your last command was too long. Try a command that produces less
+    output (head/tail/sed/grep, or redirect to a file and search in it).
+    </warning>
+    {%- set elided_chars = output.output | length - 10000 -%}
+    <output_head>
+    {{ output.output[:5000] }}
+    </output_head>
+    <elided_chars>
+    {{ elided_chars }} characters elided
+    </elided_chars>
+    <output_tail>
+    {{ output.output[-5000:] }}
+    </output_tail>
+    {%- endif -%}
+  format_error_template: |
+    Tool call error:
+
+    <error>
+    {{error}}
+    </error>
+
+    Every response must use the 'bash' tool at least once. Call it with your command as
+    the argument: {"command": "your_command_here"}. When finished, submit per the
+    instructions in the first message.
+  cost_tracking: ignore_errors

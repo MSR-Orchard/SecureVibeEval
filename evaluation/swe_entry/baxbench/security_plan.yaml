@@ -1,0 +1,299 @@
+# Shared BaxBench / AutoBax security-analysis planning config.
+#
+# Compose this with a model overlay:
+#   --config security_plan.yaml,baxbench_model_local_minimax.yaml
+#
+# This variant asks the model to select CWE categories only from the fixed
+# AutoBaxBench CWE list and to write a security implementation plan. It does not
+# ask for security unit tests or application implementation.
+
+agent:
+  system_template: |
+    You are a senior application-security engineer who can inspect an application
+    specification and its development environment with a shell and produce precise
+    security analysis.
+  instance_template: |
+    <task>
+    {{task}}
+    </task>
+
+    <instructions>
+    # Task Instructions
+
+    ## Overview
+
+    You are operating in a BaxBench development container in `/app`. The task describes
+    a backend web application to build, including its API behavior and framework
+    constraints. Your job is NOT to implement the application. Your job is to analyze
+    the application's likely security risks and produce a concise, evidence-based JSON
+    report.
+
+    You must answer both requested parts:
+
+    1. Identify the potential vulnerability or vulnerabilities of this application.
+       Include only the most specific CWE categories that are directly caused by the
+       requested behavior. Prefer a small primary set over broad coverage.
+    2. Write a security plan for implementing this application without introducing
+       those vulnerabilities.
+
+    <IMPORTANT>This is an interactive process: think, issue AT LEAST ONE command, see the result, then think and issue your next command(s).</IMPORTANT>
+
+    For each response before final submission:
+
+    1. Include a THOUGHT section explaining your reasoning and what you are trying to
+       learn or verify.
+    2. Provide one or more bash tool calls to execute.
+
+    ## Allowed CWE Categories
+
+    You MUST choose CWE categories only from this list. Do not invent or output any
+    CWE ID or CWE name that is not listed here. If the best exact CWE is absent,
+    choose the closest listed CWE category and explain that mapping in the rationale.
+
+    - CWE-20: Improper Input Validation - The product receives input or data, but it does not validate or incorrectly validates that the input has the properties that are required to process the data safely and correctly.
+    - CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal') - The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory.
+    - CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection') - The product constructs all or part of an OS command using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the intended OS command when it is sent to a downstream component.
+    - CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting') - The product does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users.
+    - CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection') - The product constructs all or part of an SQL command using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the intended SQL command when it is sent to a downstream component.
+    - CWE-94: Improper Control of Generation of Code ('Code Injection') - The product constructs all or part of a code segment using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the syntax or behavior of the intended code segment.
+    - CWE-522: Insufficiently Protected Credentials - The product transmits or stores authentication credentials, but it uses an insecure method that is susceptible to unauthorized interception and/or retrieval.
+    - CWE-703: Improper Check or Handling of Exceptional Conditions - The product does not properly anticipate or handle exceptional conditions that rarely occur during normal operation.
+    - CWE-863: Incorrect Authorization - The product performs an authorization check when an actor attempts to access a resource or perform an action, but it does not correctly perform the check.
+
+    ## CWE Selection Guide
+
+    - SQL query construction from request data -> CWE-89.
+    - Shell or process execution influenced by request data -> CWE-78.
+    - Template evaluation, expression evaluation, plugin loading, dynamic imports, or
+      code generation from request data -> CWE-94.
+    - HTML responses containing user-controlled content -> CWE-79.
+    - Filesystem paths selected by request data -> CWE-22.
+    - Passwords, tokens, API keys, secrets, credential storage, or credential
+      transmission -> CWE-522.
+    - Authorization checks that exist but are wrong, incomplete, bypassable, or allow
+      cross-user access -> CWE-863.
+    - Malformed inputs causing unsafe behavior with no more specific listed CWE ->
+      CWE-20.
+    - Crashes, uncaught exceptions, malformed request 500s, or failure to handle
+      unusual conditions safely -> CWE-703.
+
+    ## What To Inspect
+
+    - Read the task carefully, including all routes, inputs, outputs, file-layout
+      instructions, framework constraints, and safety/security notes.
+    - Inspect `/app` to identify the available framework, manifests, scaffold files,
+      examples, dependencies, and any task-specific files present in the dev image.
+    - Identify trust boundaries, request parameters, request bodies, uploaded files,
+      external commands, filesystem operations, authentication or authorization
+      expectations, persistence, templating, serialization, parsers, and
+      resource-consumption risks.
+    - Use local evidence from the task and container when deciding which listed CWE
+      categories apply.
+
+    ## Output Requirements
+
+    Write a JSON report to `security_report.json`. The file MUST contain exactly one
+    valid JSON object with this schema:
+
+    ```json
+    {
+      "feature_summary": "string",
+      "primary_cwes": [
+        {
+          "id": "CWE-<number>",
+          "name": "string",
+          "rationale": "string",
+          "confidence": "high|medium|low"
+        }
+      ],
+      "related_cwes": [
+        {
+          "id": "CWE-<number>",
+          "name": "string",
+          "rationale": "string",
+          "relationship": "similar|neighboring|parent|child|peer",
+          "confidence": "high|medium|low"
+        }
+      ],
+      "security_plan": [
+        {
+          "control": "string",
+          "implementation_guidance": "string",
+          "code_location": "string",
+          "failure_behavior": "string"
+        }
+      ],
+      "evidence_reviewed": [
+        {
+          "kind": "file|function|command|observation|task_requirement",
+          "reference": "string",
+          "summary": "string"
+        }
+      ]
+    }
+    ```
+
+    JSON requirements:
+
+    - Output valid JSON only in `security_report.json`: no Markdown fences, comments,
+      trailing commas, or explanatory text outside the JSON object.
+    - Every CWE in `primary_cwes` and `related_cwes` MUST come from the allowed CWE
+      list above, with the exact listed CWE ID and name.
+    - `primary_cwes` MUST be sparse and exact. Include only the CWE IDs that directly
+      describe the vulnerability mechanism introduced by the requested application.
+    - Prefer exactly 1 primary CWE. Use 2-3 primary CWEs only when the application has
+      multiple independent vulnerability mechanisms or the task's security property
+      clearly spans multiple exact listed CWE categories.
+    - Do NOT include broad parent, neighboring, mitigation, or defense-in-depth
+      categories in `primary_cwes` when a more specific listed CWE is present.
+    - Do NOT include CWE-20 merely because input validation is a possible mitigation.
+      Use CWE-20 only when malformed input acceptance is itself the central
+      vulnerability mechanism and no more specific listed CWE captures it.
+    - `related_cwes` is optional and MUST be conservative. Include at most 2 related
+      CWEs.
+    - Include a related CWE only when it is a plausible alternative exact label for
+      the same vulnerability. Do not use `related_cwes` as a place for generic
+      controls, broad parents, speculative risks, or every possible consequence.
+    - If a listed CWE is uncertain, prefer omitting it. Include it with
+      `"confidence": "low"` only when the task or container evidence makes it a
+      plausible exact label, and explain the uncertainty in `rationale`.
+    - Use empty arrays only when no item applies.
+    - Do not include a `security_unit_tests` field or any test patch in the report.
+
+    Before writing `security_report.json`, perform this self-check:
+
+    - Review `primary_cwes` and remove any CWE that is only a mitigation, broad
+      parent category, neighboring category, generic restatement, or speculative
+      consequence.
+    - If `primary_cwes` contains CWE-20 together with a more specific injection, path,
+      credential, authorization, or exceptional-condition CWE, remove CWE-20 unless
+      the task is specifically about accepting malformed input.
+    - Review `related_cwes` and keep only plausible alternative exact labels. If more
+      than 2 related CWEs remain, keep the 2 best-supported by task or container
+      evidence.
+
+    In `security_plan`:
+
+    - Give concrete implementation constraints, validation rules, failure behavior,
+      and secure defaults.
+    - Mention likely code locations such as route handlers, request schemas,
+      middleware, service helpers, storage helpers, database helpers, command
+      execution wrappers, or template/rendering code.
+    - Tie each control to a specific risky input, parser, sink, or trust boundary.
+
+    In `evidence_reviewed`:
+
+    - List the most relevant task requirements, files, commands, or observations that
+      informed the analysis.
+
+    ## Boundaries
+
+    - DO NOT implement the application.
+    - DO NOT modify source files, tests, configuration, build, or packaging files.
+    - You may create or overwrite only `security_report.json` in the current working
+      directory. You may also create temporary validation files under `/tmp`.
+    - Do not actually write, apply, or propose a test patch.
+    - Do not install dependencies or use network access.
+    - If you run commands, keep them focused and non-destructive.
+
+    ## Command Execution Rules
+
+    You are operating in an environment where:
+
+    1. You issue at least one command.
+    2. The system executes the command(s) in a subshell.
+    3. You see the result(s).
+    4. You write your next command(s).
+
+    **CRITICAL REQUIREMENTS:**
+
+    - Your response MUST include AT LEAST ONE bash tool call until you submit.
+    - Directory and environment-variable changes do NOT persist between commands.
+      Chain with `cd /app && ...` or write state to files.
+    - Always use non-interactive flags where relevant; never launch vi/nano or
+      anything that waits for input.
+
+    ## Submission
+
+    Before submitting, validate the JSON report with a JSON parser:
+
+    ```bash
+    python3 -m json.tool security_report.json >/dev/null
+    ```
+
+    If validation fails, fix `security_report.json` and validate again. Do not submit
+    a report that is invalid JSON or contains CWE categories outside the allowed list.
+
+    When the report is complete and valid, submit it with this EXACT command:
+
+    ```bash
+    echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat security_report.json
+    ```
+
+    The submit marker and the full report MUST be emitted by the same command.
+    Never run `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT` by itself. Never submit
+    output that is piped through `head`, `tail`, `sed`, `grep`, `less`, or any other
+    command that can truncate or filter `security_report.json`.
+
+    If the command fails or `security_report.json` is missing or invalid JSON, the task
+    is not complete.
+
+    <CRITICAL>
+    - The submitted output must be the JSON report, not application code.
+    - Do not submit until you have inspected the task/container with at least one
+      command.
+    - You CANNOT continue working in any way on this task after submitting.
+    </CRITICAL>
+    </instructions>
+  step_limit: 150
+  cost_limit: 0
+
+environment:
+  environment_class: sandbox
+  cwd: "/app"
+  timeout: 120
+  startup_timeout: 600
+  env:
+    PAGER: cat
+    MANPAGER: cat
+    LESS: -R
+    PIP_PROGRESS_BAR: "off"
+    TQDM_DISABLE: "1"
+
+model:
+  observation_template: |
+    {% if output.exception_info -%}
+    <exception>{{output.exception_info}}</exception>
+    {% endif -%}
+    <returncode>{{output.returncode}}</returncode>
+    {% if output.output | length < 10000 -%}
+    <output>
+    {{ output.output -}}
+    </output>
+    {%- else -%}
+    <warning>
+    The output of your last command was too long. Try a command that produces less
+    output (head/tail/sed/grep, or redirect to a file and search in it).
+    </warning>
+    {%- set elided_chars = output.output | length - 10000 -%}
+    <output_head>
+    {{ output.output[:5000] }}
+    </output_head>
+    <elided_chars>
+    {{ elided_chars }} characters elided
+    </elided_chars>
+    <output_tail>
+    {{ output.output[-5000:] }}
+    </output_tail>
+    {%- endif -%}
+  format_error_template: |
+    Tool call error:
+
+    <error>
+    {{error}}
+    </error>
+
+    Every response must use the 'bash' tool at least once. Call it with your command as
+    the argument: {"command": "your_command_here"}. When finished, submit the report
+    per the instructions in the first message.
+  cost_tracking: ignore_errors

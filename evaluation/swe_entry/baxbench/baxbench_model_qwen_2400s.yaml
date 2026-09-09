@@ -1,0 +1,16 @@
+# Same as baxbench_model_qwen.yaml but with a 2400 s wall clock.
+#
+# Created 2026-08-09 16:30 PDT for the TimeExceeded repair. Rationale measured that day:
+# `wall_time_limit_seconds: 1200` in evaluation.yaml killed 888 AutoBax instances
+# at a median of 72 of 100 steps -- none reached step_limit, so the clock alone stopped them.
+# At ~16.9 s/step, 2400 s lets ~91% of them reach the 100-step cap instead.
+#
+# Kept in a SEPARATE file rather than editing evaluation.yaml, because that file
+# is shared with BaxBench / SecureGen-plan / security variants and with the other host's
+# in-flight runs. Point --config at this file only for legs you intend to re-measure.
+#
+# step_limit stays 100: of instances that DID submit, only 1% used more than 99 steps.
+extends: baxbench_model_qwen.yaml
+
+agent:
+  wall_time_limit_seconds: 2400

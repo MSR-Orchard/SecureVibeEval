@@ -1,0 +1,54 @@
+# Credentials and machine-specific configuration
+.env
+.env.*
+!.env.sample
+!.env.example
+!.env.template
+
+# Python environments and generated package metadata
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+
+# JavaScript dependencies
+node_modules/
+
+# Downloaded datasets: retain documentation and source/checksum manifests
+/data/raw/
+/data/recipes/
+/data/.cache/
+
+# Generated runs and model artifacts
+results/
+runtime/
+logs/
+checkpoints/
+wandb/
+ray_results/
+tensorboard/
+*.log
+*.safetensors
+*.ckpt
+
+# Build outputs
+/build/
+/dist/
+
+# Editor and operating-system files
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

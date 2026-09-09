@@ -1,0 +1,12 @@
+model:
+  model_name: "openai/Qwen/Qwen3.5-35B-A3B"
+  model_kwargs:
+    drop_params: true
+    temperature: 1.0
+    parallel_tool_calls: false
+    max_tokens: 6000
+    stop:
+      - "<|im_end|>"
+      - "<|endoftext|>"
+agent:
+  step_limit: 100

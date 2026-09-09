@@ -1,0 +1,23 @@
+# AutoBax model config. AutoBax runs through run_baxbench_eval and so inherits
+# evaluation.yaml, but it needs a larger per-response and wall-clock
+# budget than BaxBench: at BaxBench's 2000 tokens / 1200 s a large share of
+# AutoBax instances exit `TimeExceeded` mid-task rather than on their own merits.
+# Loaded after the shared config, so the `agent` block here overrides
+# evaluation.yaml's wall_time_limit_seconds.
+environment:
+  environment_class: sandbox
+
+model:
+  model_name: "openai/Qwen/Qwen3.5-35B-A3B"
+  model_kwargs:
+    drop_params: true
+    temperature: 1.0
+    parallel_tool_calls: false
+    max_tokens: 6000
+    stop:
+      - "<|im_end|>"
+      - "<|endoftext|>"
+
+agent:
+  step_limit: 100
+  wall_time_limit_seconds: 2400

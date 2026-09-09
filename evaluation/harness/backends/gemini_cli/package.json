@@ -1,0 +1,11 @@
+{
+  "name": "safevibe-gemini-cli",
+  "private": true,
+  "version": "1.0.0",
+  "engines": {
+    "node": "22.23.2"
+  },
+  "dependencies": {
+    "@google/gemini-cli": "0.59.0"
+  }
+}
