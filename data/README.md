@@ -1,11 +1,11 @@
-# SafeVibeEval evaluation inputs
+# SecureVibeEval evaluation inputs
 
 Evaluation inputs live under `raw/`. From `evaluation/`, the runners default
 to this repository's `data/raw/`; override `DATA_DIR` with an absolute path to
 use another location.
 
 Evaluation inputs are published under `raw/` in the public
-[SafeVibe dataset on Hugging Face](https://huggingface.co/datasets/dqwang122/SafeVibe/tree/main/raw).
+[SecureVibe dataset on Hugging Face](https://huggingface.co/datasets/dqwang122/SafeVibe/tree/main/raw).
 
 ## File inventory
 
@@ -27,5 +27,5 @@ Download evaluation inputs from the Hugging Face link above. Raw inputs are
 excluded from this code repository. The public dataset includes the derived
 SecureGen evaluation instances; underlying benchmark terms still apply.
 
-SafeVibe training recipes are available under
+SecureVibe training recipes are available under
 [`recipes/` in the same dataset](https://huggingface.co/datasets/dqwang122/SafeVibe/tree/main/recipes).

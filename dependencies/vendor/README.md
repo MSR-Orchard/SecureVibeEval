@@ -1,8 +1,8 @@
 # Bundled mini-swe-agent
 
 SafeBench includes its own mini-swe-agent source snapshot at `mini-swe-agent/`.
-Evaluation setup uses this local copy, so a SafeVibe checkout is not required.
-The snapshot is copied unchanged from the SafeVibe release bundle and verified
+Evaluation setup uses this local copy, so a SecureVibe checkout is not required.
+The snapshot is copied unchanged from the SecureVibe release bundle and verified
 against its existing file manifest.
 
 From this directory, verify it with:

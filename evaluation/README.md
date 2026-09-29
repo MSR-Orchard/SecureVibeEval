@@ -1,4 +1,4 @@
-# SafeVibe evaluation
+# SecureVibeEval evaluation
 
 This component runs and grades the SecureGen, AutoBax, BaxBench, and SusVibes
 evaluation suites.
@@ -20,7 +20,7 @@ evaluation suites.
 ```
 
 The entrypoints live in this directory. The compatible mini-swe-agent source,
-including its SafeVibe sandbox integration, is bundled at
+including its SecureVibe sandbox integration, is bundled at
 `../dependencies/vendor/mini-swe-agent` and installed in editable mode by
 `setup.sh`. Its license and source checksum manifest are preserved. Set
 `MINISWE_AGENT_DIR` only when intentionally using another compatible checkout.
@@ -36,21 +36,21 @@ directory. See [the data guide](../data/README.md) for local filenames and roles
 `DATA_DIR` overrides this location.
 
 
-Set `SAFEVIBE_DATA_REPO` to a Hugging Face dataset repository you are
+Set `SECUREVIBE_DATA_REPO` to a Hugging Face dataset repository you are
 authorized to use that contains the required task data under `raw/`.
 Authenticate if required, then download it to a persistent location:
 
 ```bash
 hf auth login
 
-SAFEVIBE_DATA_DIR=/path/to/safevibe-data
-hf download "${SAFEVIBE_DATA_REPO:?Set SAFEVIBE_DATA_REPO to your dataset repository}" \
+SECUREVIBE_DATA_DIR=/path/to/securevibe-data
+hf download "${SECUREVIBE_DATA_REPO:?Set SECUREVIBE_DATA_REPO to your dataset repository}" \
   --repo-type dataset \
   --include "raw/**" \
   --include SHA256SUMS \
-  --local-dir "${SAFEVIBE_DATA_DIR}"
+  --local-dir "${SECUREVIBE_DATA_DIR}"
 
-export DATA_DIR="${SAFEVIBE_DATA_DIR}/raw"
+export DATA_DIR="${SECUREVIBE_DATA_DIR}/raw"
 
 # Downloads retain upstream names; select them explicitly for the sequence scripts.
 export SECUREGEN_TASKS="${DATA_DIR}/securegen/tasks_no_leak.jsonl"

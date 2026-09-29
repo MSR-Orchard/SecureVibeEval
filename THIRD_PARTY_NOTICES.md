@@ -1,7 +1,7 @@
 # Third-party components
 
-SafeVibeEval was extracted from SafeVibe. The original project code retains
-SafeVibe's [MIT license and copyright notice](LICENSE).
+SecureVibeEval was extracted from SecureVibe. The original project code retains
+SecureVibe's [MIT license and copyright notice](LICENSE).
 
 - **mini-swe-agent:** bundled under `dependencies/vendor/mini-swe-agent/`.
   Preserve its [license](dependencies/vendor/mini-swe-agent/LICENSE.md).

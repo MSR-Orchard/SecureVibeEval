@@ -1,11 +1,11 @@
-# SafeVibeEval
+# SecureVibeEval
 
-SafeVibeEval evaluates security-aware coding agents on SecureGen, AutoBax,
+SecureVibeEval evaluates security-aware coding agents on SecureGen, AutoBax,
 BaxBench, and SusVibes. It includes model-endpoint runners, benchmark graders,
 and a multi-CLI harness for Claude Code, Codex, Copilot, Gemini, and Pi.
 
 Training workflows are maintained separately in
-[SafeVibe](https://github.com/MSR-Orchard/SafeVibe). SafeVibeEval can be used independently
+[SecureVibe](https://github.com/MSR-Orchard/SecureVibe). SecureVibeEval can be used independently
 of that repository and does not require its GPU training stack.
 
 ## Layout
@@ -19,7 +19,7 @@ of that repository and does not require its GPU training stack.
 ## Quickstart
 
 Evaluation data is available in the public
-[SafeVibe dataset on Hugging Face](https://huggingface.co/datasets/dqwang122/SafeVibe/tree/main/raw).
+[SecureVibe dataset on Hugging Face](https://huggingface.co/datasets/dqwang122/SafeVibe/tree/main/raw).
 
 Requirements: Python 3.11 or newer, Bash 4.3 or newer, prepared benchmark
 inputs, a model endpoint, and access to task images and an execution backend.
@@ -68,7 +68,7 @@ After setup, run from `evaluation/`:
 ```
 
 These checks do not launch model or sandbox jobs. The `evaluation/` directory
-layout is retained from SafeVibe so runner imports and repository-relative
+layout is retained from SecureVibe so runner imports and repository-relative
 dependency paths remain stable.
 
 ## License
