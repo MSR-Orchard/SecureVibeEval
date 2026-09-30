@@ -7,6 +7,27 @@ use another location.
 Evaluation inputs are published under `raw/` in the public
 [SecureVibe dataset on Hugging Face](https://huggingface.co/datasets/dqwang122/SafeVibe/tree/main/raw).
 
+## Benchmark names and sources
+
+See the [benchmark overview](../README.md#benchmarks-and-datasets) for task
+counts, languages, CWE coverage, and evaluation metrics. Benchmark names map to
+the existing runtime directories as follows:
+
+- **PatchEval-Gen** uses `raw/securegen/` and the `securegen` runner/grader.
+  It adapts [PatchEval](https://github.com/bytedance/PatchEval) into feature
+  implementation tasks, excluding CVE IDs shared with SusVibes. `SecureGen`
+  is the retained implementation name.
+- **AutoBaxBench** uses `raw/autobax/` and the `autobax` runner/grader. Its
+  source is [AutoBaxBuilder](https://github.com/eth-sri/autobaxbuilder).
+- **BaxBench** uses `raw/baxbench/` and the `baxbench` runner/grader. Its source
+  is [BaxBench](https://github.com/logic-star-ai/baxbench).
+- **SusVibes** uses `raw/susvibes/` and the `susvibes` runner/grader. Its source
+  is [SusVibes](https://github.com/LeiLiLab/susvibes).
+
+Use the runtime identifiers in commands and paths; the benchmark names do not
+change the filenames below. Model execution inputs and grading inputs serve
+different purposes and should not be substituted for one another.
+
 ## File inventory
 
 - `raw/securegen/securegen_mini_instances.json`: mini-agent evaluation instances.
